@@ -34,7 +34,7 @@
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden; /* para recortar esquinas redondeadas en secciones internas */
+            overflow: hidden;
         }
 
         /* ------------------------------
@@ -66,22 +66,7 @@
         }
 
         /* ------------------------------
-           DATOS FACTURA
-           ------------------------------ */
-        .data-container {
-            margin-bottom: 20px;
-        }
-        .data-container p {
-            margin: 6px 0;
-            font-size: 1rem;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #555;
-        }
-
-        /* ------------------------------
-           SECCIÓN DE TOTALES DESTACADA
+           SECCIÓN DE TOTALES
            ------------------------------ */
         .totals-section {
             display: flex;
@@ -89,6 +74,7 @@
             margin-bottom: 20px;
             gap: 10px;
         }
+
         .total-box {
             flex: 1;
             background: #f8f9fc;
@@ -97,12 +83,14 @@
             padding: 15px 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
+
         .total-box .label {
             display: block;
             font-weight: 600;
             font-size: 1rem;
             color: #666;
         }
+
         .total-box .amount {
             font-size: 1.6rem;
             font-weight: bold;
@@ -119,10 +107,19 @@
             color: #007bff;
         }
 
+        /* ENVOLVER LA TABLA PARA PERMITIR SCROLL */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            padding-bottom: 10px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            background: #fff;
+            min-width: 600px; /* Evita que la tabla se achique en móviles */
         }
 
         table thead {
@@ -134,9 +131,9 @@
             padding: 12px;
             border: 1px solid #ddd;
             font-size: 0.95rem;
+            text-align: center;
         }
 
-        /* Efecto hover en las filas */
         tbody tr:hover {
             background-color: #f3f5f7;
         }
@@ -147,19 +144,23 @@
         .pagos-section {
             margin-top: 20px;
         }
+
         .pagos-section h3 {
             font-size: 1.1rem;
             color: #007bff;
             margin-bottom: 10px;
         }
+
         .pagos-section ul {
             list-style: none;
             padding-left: 0;
         }
+
         .pagos-section li {
             margin: 6px 0;
             font-size: 0.95rem;
         }
+
         .pagos-section strong {
             color: #555;
         }
@@ -177,6 +178,7 @@
             font-size: 0.95rem;
             transition: background-color 0.3s;
         }
+
         .back-button:hover {
             background-color: #0056b3;
         }
@@ -188,8 +190,17 @@
             .totals-section {
                 flex-direction: column;
             }
+
             .total-box {
                 margin-bottom: 10px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
             }
         }
     </style>
@@ -197,7 +208,6 @@
 <body>
 
 <div class="container">
-    <!-- Encabezado de la página -->
     <div class="header">
         <h1>Detalle de la Factura</h1>
     </div>
@@ -206,7 +216,6 @@
         {% if mensaje %}
             <p class="mensaje">{{ mensaje }}</p>
         {% else %}
-            <!-- DATOS GENERALES DE LA FACTURA -->
             <div class="data-container">
                 <p><span class="highlight">Factura No:</span> {{ datos_venta[0] }}</p>
                 <p><span class="highlight">Cliente:</span> {{ datos_venta[1] }}</p>
@@ -215,11 +224,9 @@
                 <p><span class="highlight">Concepto:</span> {{ datos_venta[12] }}</p>
             </div>
 
-            <!-- SECCIÓN DESTACADA PARA TOTAL Y SALDO PENDIENTE (SIN DECIMALES) -->
             <div class="totals-section">
                 <div class="total-box">
                     <span class="label">Total</span>
-                    <!-- Usar filtro int o round(0) para eliminar decimales -->
                     <span class="amount">${{ datos_venta[3]|int }}</span>
                 </div>
                 <div class="total-box">
@@ -228,50 +235,46 @@
                 </div>
             </div>
 
-            <!-- DETALLE DE PRODUCTOS -->
             <div class="table-section">
                 <h3>Detalle de Productos</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Cantidad</th>
-                            <th>Precio Unitario</th>
-                            <th>Precio Total</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in detalle_eventos %}
-                        <tr>
-                            <td>{{ item[0] }}</td>
-                            <td>{{ item[1] }}</td>
-                            <td>${{ item[2] / item[1] }}</td>
-                            <td>${{ item[2] }}</td>
-                            <td>{% if item[3] != None %}Pagado{% else %}Pendiente{% endif %}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unitario</th>
+                                <th>Precio Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in detalle_eventos %}
+                            <tr>
+                                <td>{{ item[0] }}</td>
+                                <td>{{ item[1] }}</td>
+                                <td>${{ item[2] / item[1] }}</td>
+                                <td>${{ item[2] }}</td>
+                                <td>{% if item[3] != None %}Pagado{% else %}Pendiente{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- PAGOS RECIBIDOS -->
             <div class="pagos-section">
                 <h3>Pagos Recibidos</h3>
                 <ul>
                     <li><strong>Caja (Efectivo):</strong> ${{ datos_venta[5] }}</li>
                     <li><strong>Nequi:</strong> ${{ datos_venta[6] }}</li>
-                    <li><strong>Bancolombia:</strong> ${{ datos_venta[7] }}</li>
-                    <li><strong>Datafono:</strong> ${{ datos_venta[8] }}</li>
-                    <li><strong>Julian:</strong> ${{ datos_venta[9] }}</li>
-                    <li><strong>Fiado:</strong> ${{ datos_venta[10] }}</li>
                 </ul>
             </div>
         {% endif %}
-
         <a class="back-button" href="/">Volver</a>
     </div>
 </div>
 
 </body>
 </html>
+
